@@ -45,7 +45,20 @@
  - this is what the UI elements exist on
  - to align the Canvas to the camera, change *Render Mode* into *Screen Space - Camera*
  - the *EventSystem* is used to detect input on elements of the UI
- - *Text* is distinct from *TextMeshPro*   
+ - *Text* is distinct from *TextMeshPro*
+
+### Prefabs
+- just drag and drop a game object into the Prefabs folder
+- it is effectively a saved template of that object
+- **WHEN YOU CHANGE AN OBJECT IN THE HIERARCHY** go to overrides in the inspector and apply all changes, if you want it to be saved to the prefab
+- if you want it to be saved to a different prefab, drag the object back to the Prefabs folder and make it a variant
+
+### Layers & Backgrounds
+- all sprites have a layer, as shown on the Sprite Renderer
+- **Order in Layer** shows the order in which sprites are shown within a layer
+- a new layer can be added in Sorting Layer
+- for large backgrounds made of many smaller, repeated ones, make an empty object to act as a folder
+- hold V to snap objects to others, to align them
 
 ## CODE
 ### Variables & Operations
@@ -108,12 +121,16 @@
 - this allows the script to manipulate the functions of the attached components
 - Monobehaviour allows access to the Transform component through `transform`
 
-### Prefabs
-- just drag and drop a game object into the Prefabs folder
-- it is effectively a saved template of that object
+
 
 ### Movement
 - **INPUT IS IN OLD VERSION OF UNITY INPUT HANDLING**
 - call `using UnityEngine; using System.Collections; using System.Collections.Generic;`
-- get the direction of travel using `Input.GetAxis("Horizontal");` and `Input.GetAxis("Vertical");`
-- using a `Vector2` to represent the position
+- `movementX = Input.GetAxis("Horizontal");`
+- `Input.GetAxis` returns a number from -1 (left) to 1 (right) when pressing one of the directional keys (Arrow or WASD)
+- `GetAxisRaw` gives either 1, 0, or -1
+- `GetAxis` gives decimals ramping up to either end
+- `transform.position += Vector3(movementX, 0f, 0f) * moveForce * time.deltaTime;`
+- `Vector3` is a 3D vector, so that a vector is added onto the current position
+- the z-axis is functionally useless in 2D
+- `time.deltaTime` is the interval between frames, to smooth out the movement
