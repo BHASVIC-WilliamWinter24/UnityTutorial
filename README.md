@@ -1,4 +1,7 @@
 # UNITY TUTORIAL
+Disclaimer- **INPUT IS IN OLD VERSION OF UNITY INPUT HANDLING**
+
+
 ## TABS
 - **Hierarchy:** holds the game objects (create new with *right click*)
 - **Inspector:** shows the details of a selected object (e.g. sprites, location, scripts). Right click to *Add Component*
@@ -25,6 +28,13 @@
 - the **Animator** tab allows transitions between animations
 - transitions appear as white lines, and require conditions
 - use the Parameters tab and the drop-down menu, and assign that Parameter to the condition of a transition
+- use if statements to determine when an animation should be playing
+- `anim.setBool(conditionName, true)` will set a parameter in the Animator to be true, where `anim` is the reference to the Animator
+- to mirror the player, change the transform scale (make the requisite axis negative) or change the Flip property in the sprite renderer (`sr.flipX = true`)
+- to reference the parameter, ensure that the name is definitely the same in code and in the animator
+- if the animation seems a little delayed, find the drop-down list in the transition and change the transition duration
+- also in the Animator, the animation speed can be changed (click on it, its at the top)
+- 
 
 ## Physics
 - use *Add Component* to add RigidBody 2D
@@ -33,6 +43,7 @@
 - pick the collider with the most similar shape to your object
 - can edit the collider to exclude areas (like little bits of decoration)
 - *IsTrigger* is intangible but detects collision
+- for objects it is a good idea to use capsule colliders, as box colliders can sometimes catch
 
 ## Audio
 - *Audio Source* plays audio
@@ -52,6 +63,7 @@
 - it is effectively a saved template of that object
 - **WHEN YOU CHANGE AN OBJECT IN THE HIERARCHY** go to overrides in the inspector and apply all changes, if you want it to be saved to the prefab
 - if you want it to be saved to a different prefab, drag the object back to the Prefabs folder and make it a variant
+- you can edit prefabs without them being on the Scene
 
 ### Layers & Backgrounds
 - all sprites have a layer, as shown on the Sprite Renderer
@@ -80,6 +92,7 @@
 - strings can be concatenated with +
 - functions and polymorphism works the same as in Java
 - **if statements**: `if (variable < 0) {  }`, `else if (variable >= 0) {  }`, `else {  }`
+- if there is only one line after an if statement, you can omit the curly brackets
 - **OR** = `||`, **AND** = `&&`
 - **switch-case statements**: `switch (variable) {  case (value): etc case (value): etc  }`
 - remember to use `break:` to break from the switch-case
@@ -121,10 +134,8 @@
 - this allows the script to manipulate the functions of the attached components
 - Monobehaviour allows access to the Transform component through `transform`
 
-
-
 ### Movement
-- **INPUT IS IN OLD VERSION OF UNITY INPUT HANDLING**
+#### Player
 - call `using UnityEngine; using System.Collections; using System.Collections.Generic;`
 - `movementX = Input.GetAxis("Horizontal");`
 - `Input.GetAxis` returns a number from -1 (left) to 1 (right) when pressing one of the directional keys (Arrow or WASD)
@@ -132,5 +143,55 @@
 - `GetAxis` gives decimals ramping up to either end
 - `transform.position += Vector3(movementX, 0f, 0f) * moveForce * time.deltaTime;`
 - `Vector3` is a 3D vector, so that a vector is added onto the current position
-- the z-axis is functionally useless in 2D
 - `time.deltaTime` is the interval between frames, to smooth out the movement
+#### Monster
+- using velocity in the `FixedUpdate` (because they are solely moving on a line)
+- use `body.linearVelocity = new Vector2(speed, body.linearVelocity.y);`, which sets the velocity to be constant (0) on the y and whatever the speed is on the x
+- the speed will be equal and opposite depending on what side of the player the monster spawns, so they travel towards the player in a line
+- we can set objects to become *kinematic* in the Rigidbody, so forces will affect them but Gravity will not (static has no forces also)
+
+### Jumping
+- use `Input.getButtonDown("Jump")` to determine when the button has been pressed down *only*
+- getButtonUp returns true when the button is released
+- getButton returns true while the button is held
+- call PlayerJump in FixedUpdate, not Update; it is called every fixed intervals (usually used to do physics stuff)
+- use `body.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse) where body is a reference to the Rigidbody2D
+- this denotes that the force of the jump is added on the y-axis, with an instant force (an impulse)
+- mess with the gravity/mass to figure out jump stuff
+- use a Boolean called `isGrounded` to detect if they are in the air
+- set this to `false` when they jump, and then to `true` when they contact the ground
+- built-in function `OnCollisionEnter2D(Collision2D collision)`
+- `if (collision.gameObject.CompareTag(GROUND_TAG))` where `GROUND_TAG` is the tag on every ground object
+- **issue: if only using getButtonDown and fixedUpdate the button can be a bit finicky (at least for me). Just remove down and it will be fine (albeit with a glitch**
+
+### Camera Follow
+- get an attribute reference of the player's transform; `player = GameObject.FindWithTag("Player").transform`
+- get the current position as a temporary value, then alter that temporary value to that of the player
+- set the transform of the camera to the temporary value
+- to find the player's values use `player.position.x` and `player.position.y`
+- call this is `LateUpdate`, so that the player's position is calculated first and there's not jittering
+- to create limits to the movement of the camera, make a minimum and a maximum
+- `if (tempPos.x < minX) { tempPos.x = minX; }`
+
+### Spawners
+- should be empty game objects (tag them in the inspector's unity cube to make them visible)
+- add a `GameObject[]` list to store the references of the enemies
+- to add monsters, serialise the above field and then lock the inspector
+- this allows you to Ctrl-Click all the monsters, and drag and drop them into the field
+- if multiple spawners are using this script, do the same as the above with their positions
+- create an `IEnumerator` so that the spawn can be called multiple times in intervals
+- use `yield return new WaitForSeconds(n)` where `n` is a random number
+- random number is generated with `Random.Range(1, 5)`, where lower bound is inclusive
+- generate a random index to find which monster to spawn and where (if multiple spawners and works as such)
+- use `Instantiate()` to create the game object inside the brackets
+- use 'Monster.transform.position` and set that to the position of the spawner
+- to use a public component from another GameObject, `ObjectName.GetComponent<scriptName>().function()` etc.
+
+### Collision and Destruction
+- to detect a collision, at least one must have to have a Rigidbody
+- use the same syntax as the IsGrounded tag
+- `Destroy(gameObject)` deletes an object from the game
+- this means that any references to that object will return an error - fix void functions with `if (null) { return; }`
+- if the colliding object is not solid, ensure `IsTrigger` is ticked on the collider
+- use the `OnTriggerEnter2D(Collider2D collision)` function and `if (collision.CompareTag(ENEMY_TAG)` to check if collision
+- to make sure some things can't collide (e.g. every enemy) add a layer, go into Settings then Physics 2D, and untick the respective box on the matrix
