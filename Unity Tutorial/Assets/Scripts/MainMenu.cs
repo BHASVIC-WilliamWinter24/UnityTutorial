@@ -4,17 +4,17 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-
-    public void PlayGame()
+    
+    public void WhenClicked()
     {
         string clickedObject = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name;
         int index;
+        Debug.Log("pressed " + clickedObject);
         if (clickedObject == "Player 1 Select")
             index = 0;
         else
             index = 1;
         GameController.instance.PlayerIndex = index; // passes index into the static instance of the GameController
         SceneManager.LoadScene("Monster Chase Gameplay");
-
     }
 }

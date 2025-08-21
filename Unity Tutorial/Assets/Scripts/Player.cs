@@ -26,26 +26,15 @@ public class Player1 : MonoBehaviour
         anim = GetComponent<Animator>();
         sprite = GetComponent<SpriteRenderer>();
     }
-
-    void Start() // called 3rd (after onEnable and Awake)
-    {
-
-    }
-
-    void FixedUpdate() // called in 0.02 second intervals
-    {
-        PlayerJump();
-    }
-
+    
     void Update() // called once per frame
     {
         PlayerMoveKeyboard();
         AnimatePlayer();
         if (Input.GetButtonDown("Jump"))
             Debug.Log("pressed");
+        PlayerJump();
     }
-
-
 
     void PlayerMoveKeyboard()
     {
@@ -77,9 +66,8 @@ public class Player1 : MonoBehaviour
 
     void PlayerJump()
     {
-        if (Input.GetButton("Jump") && isGrounded) // if space button held & on ground
+        if (Input.GetButtonDown("Jump") && isGrounded) // if space button held & on ground
         {
-            Debug.Log("jump");
             isGrounded = false;
             body.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         }
